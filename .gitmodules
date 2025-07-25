@@ -1,0 +1,3 @@
+[submodule "deps/anjay-lite"]
+	path = deps/anjay-lite
+	url = https://github.com/AVSystem/Anjay-lite.git
