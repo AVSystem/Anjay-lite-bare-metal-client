@@ -1,17 +1,18 @@
 /*
  * Copyright 2025 AVSystem <avsystem@avsystem.com>
- * AVSystem Anjay LwM2M SDK
+ * AVSystem Anjay Lite LwM2M SDK
  * All rights reserved.
  *
- * Licensed under the AVSystem-5-clause License.
+ * Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
  * See the attached LICENSE file for details.
  */
+
 #include <assert.h>
 #include <stdint.h>
 #include <string.h>
 
 #include <anj/compat/net/anj_net_api.h>
-#include <anj/log/log.h>
+#include <anj/log.h>
 #include <anj/utils.h>
 
 #include "modem/modem.h"
@@ -74,12 +75,12 @@ net_connect(net_ctx_t *ctx, const char *hostname, const char *port_str) {
             return -1;
         }
         ctx->current_op = CURRENT_OP_CONNECT;
-        return ANJ_NET_EAGAIN;
+        return ANJ_NET_EINPROGRESS;
     }
     case CURRENT_OP_CONNECT: {
         int res = modem_socket_open_continue(&ctx->op_ctx.open);
         if (res > 0) {
-            return ANJ_NET_EAGAIN;
+            return ANJ_NET_EINPROGRESS;
         }
         ctx->current_op = CURRENT_OP_NONE;
         if (res < 0) {
@@ -115,12 +116,12 @@ static int net_send(net_ctx_t *ctx,
             return -1;
         }
         ctx->current_op = CURRENT_OP_SEND;
-        return ANJ_NET_EAGAIN;
+        return ANJ_NET_EINPROGRESS;
     }
     case CURRENT_OP_SEND: {
         int res = modem_socket_send_continue(&ctx->op_ctx.send, length, buf);
         if (res > 0) {
-            return ANJ_NET_EAGAIN;
+            return ANJ_NET_EINPROGRESS;
         }
         ctx->current_op = CURRENT_OP_NONE;
         if (res < 0) {
@@ -167,7 +168,7 @@ static int net_shutdown(net_ctx_t *ctx) {
     case CURRENT_OP_SHUTDOWN: {
         int res = modem_socket_close_continue();
         if (res > 0) {
-            return ANJ_NET_EAGAIN;
+            return ANJ_NET_EINPROGRESS;
         }
         ctx->state = ANJ_NET_SOCKET_STATE_SHUTDOWN;
         ctx->current_op = CURRENT_OP_NONE;
@@ -182,7 +183,7 @@ static int net_shutdown(net_ctx_t *ctx) {
             return -1;
         }
         ctx->current_op = CURRENT_OP_SHUTDOWN;
-        return ANJ_NET_EAGAIN;
+        return ANJ_NET_EINPROGRESS;
     }
     }
     return 0;
@@ -226,13 +227,18 @@ static int net_cleanup_ctx(net_ctx_t **ctx) {
     int close_result = 0;
     if ((*ctx)->state != ANJ_NET_SOCKET_STATE_CLOSED) {
         close_result = net_close(*ctx);
-        if (close_result == ANJ_NET_EAGAIN) {
-            return ANJ_NET_EAGAIN;
+        if (close_result == ANJ_NET_EINPROGRESS) {
+            return close_result;
         }
     }
     (*ctx)->used = false;
     *ctx = NULL;
     return close_result;
+}
+
+static int net_queue_mode_rx_off(anj_net_ctx_t *ctx) {
+    (void) ctx;
+    return ANJ_NET_OK;
 }
 
 #ifdef ANJ_NET_WITH_UDP
@@ -282,5 +288,9 @@ int anj_udp_get_inner_mtu(anj_net_ctx_t *ctx, int32_t *out_value) {
 
 int anj_udp_reuse_last_port(anj_net_ctx_t *ctx) {
     return net_reuse_last_port((net_ctx_t *) ctx);
+}
+
+int anj_udp_queue_mode_rx_off(anj_net_ctx_t *ctx) {
+    return net_queue_mode_rx_off(ctx);
 }
 #endif // ANJ_NET_WITH_UDP

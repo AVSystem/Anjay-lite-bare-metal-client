@@ -1,6 +1,10 @@
 # Copyright 2025 AVSystem <avsystem@avsystem.com>
-# AVSystem Anjay LwM2M SDK
-# ALL RIGHTS RESERVED
+# AVSystem Anjay Lite LwM2M SDK
+# All rights reserved.
+#
+# Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
+# See the attached LICENSE file for details.
+
 cmake_minimum_required(VERSION 3.22)
 
 # Validate that STM32CubeMX code is compatible with C standard
@@ -58,6 +62,7 @@ set(MX_Application_Src
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/platform.c
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/adc.c
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/gpdma.c
+    ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/rng.c
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/usart.c
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/stm32u3xx_it.c
     ${CMAKE_SOURCE_DIR}/deps/ST/Core/Src/stm32u3xx_hal_msp.c
@@ -85,6 +90,8 @@ set(STM32_Drivers_Src
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_pwr_ex.c
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_gtzc.c
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_icache.c
+    ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_rng.c
+    ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_rng_ex.c
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_tim.c
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_tim_ex.c
     ${CMAKE_SOURCE_DIR}/deps/ST/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_usart.c
@@ -112,15 +119,32 @@ file(
 )
 add_library(anjay_lite ${ANJAY_LITE_SOURCES})
 
-target_include_directories(
-    anjay_lite PUBLIC
-    ${CMAKE_SOURCE_DIR}/deps/anjay-lite/include_public
-    ${CMAKE_SOURCE_DIR}/config
-)
-
 target_compile_options(anjay_lite PRIVATE
     -fmacro-prefix-map=${CMAKE_SOURCE_DIR}=.
 )
+
+target_include_directories(anjay_lite PUBLIC
+	${CMAKE_SOURCE_DIR}/deps/anjay-lite/include_public
+	${CMAKE_SOURCE_DIR}/config
+)
+
+# MBEDTLS
+file(
+    GLOB_RECURSE
+    MBEDTLS_SOURCES 
+    "${CMAKE_SOURCE_DIR}/deps/mbedtls/library/*.c"
+)
+add_library(mbedtls_lib ${MBEDTLS_SOURCES})
+target_compile_definitions(mbedtls_lib PUBLIC
+	-DMBEDTLS_CONFIG_FILE="${CMAKE_SOURCE_DIR}/src/compat/mbedtls/anj_client_mbedtls_config.h"
+)
+
+target_include_directories(mbedtls_lib PUBLIC
+	${CMAKE_SOURCE_DIR}/deps/mbedtls/include
+	${CMAKE_SOURCE_DIR}/src/compat/mbedtls
+)
+
+target_link_libraries(anjay_lite mbedtls_lib)
 
 # Main executable
 file(
@@ -143,6 +167,11 @@ target_link_libraries(
     anjay_lite
 )
 
+target_include_directories(
+    ${CMAKE_PROJECT_NAME} PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
 # Add the map file to the list of files to be removed with 'clean' target
 set_target_properties(
     ${CMAKE_PROJECT_NAME}
@@ -163,10 +192,24 @@ set(
     CACHE STRING
     "LwM2M endpoint name"
 )
+set(
+    CONFIG_PSK_IDENTITY
+    "anjay-lite-bare-metal-client"
+    CACHE STRING
+    "PSK identity"
+)
+set(
+    CONFIG_PSK_KEY
+    "psk"
+    CACHE STRING
+    "PSK key"
+)
 
 target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
     CONFIG_APN="${CONFIG_APN}"
     CONFIG_ENDPOINT_NAME="${CONFIG_ENDPOINT_NAME}"
+	CONFIG_PSK_IDENTITY="${CONFIG_PSK_IDENTITY}"
+	CONFIG_PSK_KEY="${CONFIG_PSK_KEY}"
 )
 
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE

@@ -1,7 +1,10 @@
 /*
  * Copyright 2025 AVSystem <avsystem@avsystem.com>
- * AVSystem Anjay LwM2M SDK
- * ALL RIGHTS RESERVED
+ * AVSystem Anjay Lite LwM2M SDK
+ * All rights reserved.
+ *
+ * Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
+ * See the attached LICENSE file for details.
  */
 
 #define _DEFAULT_SOURCE
@@ -51,31 +54,31 @@ static const anj_dm_res_t RES[TEMPERATURE_RESOURCES_COUNT] = {
     [RID_MIN_MEASURED_VALUE_IDX] = {
         .rid = RID_MIN_MEASURED_VALUE,
         .type = ANJ_DATA_TYPE_DOUBLE,
-        .operation = ANJ_DM_RES_R
+        .kind = ANJ_DM_RES_R
     },
     [RID_MAX_MEASURED_VALUE_IDX] = {
         .rid = RID_MAX_MEASURED_VALUE,
         .type = ANJ_DATA_TYPE_DOUBLE,
-        .operation = ANJ_DM_RES_R
+        .kind = ANJ_DM_RES_R
     },
     [RID_RESET_MIN_MAX_MEASURED_VALUES_IDX] = {
         .rid = RID_RESET_MIN_MAX_MEASURED_VALUES,
-        .operation = ANJ_DM_RES_E
+        .kind = ANJ_DM_RES_E
     },
     [RID_SENSOR_VALUE_IDX] = {
         .rid = RID_SENSOR_VALUE,
         .type = ANJ_DATA_TYPE_DOUBLE,
-        .operation = ANJ_DM_RES_R
+        .kind = ANJ_DM_RES_R
     },
     [RID_SENSOR_UNIT_IDX] = {
         .rid = RID_SENSOR_UNIT,
         .type = ANJ_DATA_TYPE_STRING,
-        .operation = ANJ_DM_RES_R
+        .kind = ANJ_DM_RES_R
     },
     [RID_APPLICATION_TYPE_IDX] = {
         .rid = RID_APPLICATION_TYPE,
         .type = ANJ_DATA_TYPE_STRING,
-        .operation = ANJ_DM_RES_RW
+        .kind = ANJ_DM_RES_RW
     }
 };
 
@@ -229,7 +232,9 @@ static int transaction_begin(anj_t *anj, const anj_dm_obj_t *obj) {
     return 0;
 }
 
-static void transaction_end(anj_t *anj, const anj_dm_obj_t *obj, int result) {
+static void transaction_end(anj_t *anj,
+                            const anj_dm_obj_t *obj,
+                            anj_dm_transaction_result_t result) {
     (void) anj;
     (void) obj;
     temp_obj_ctx_t *temp_obj_ctx = get_ctx();

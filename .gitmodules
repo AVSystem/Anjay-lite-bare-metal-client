@@ -1,3 +1,9 @@
+[submodule "tools/deploy-utils"]
+	path = tools/deploy-utils
+	url = ../deploy-utils.git
 [submodule "deps/anjay-lite"]
 	path = deps/anjay-lite
-	url = https://github.com/AVSystem/Anjay-lite.git
+	url = ../anjay-lite.git
+[submodule "deps/mbedtls"]
+	path = deps/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git

@@ -1,13 +1,17 @@
 /*
  * Copyright 2025 AVSystem <avsystem@avsystem.com>
- * AVSystem Anjay LwM2M SDK
- * ALL RIGHTS RESERVED
+ * AVSystem Anjay Lite LwM2M SDK
+ * All rights reserved.
+ *
+ * Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
+ * See the attached LICENSE file for details.
  */
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include <anj/log/log.h>
+#include <anj/log.h>
 #include <anj/utils.h>
 
 #include <stm32u3xx_hal.h>

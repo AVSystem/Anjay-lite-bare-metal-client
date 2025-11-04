@@ -10,6 +10,8 @@ Internet connectivity is provided through a BG96 modem. The project includes a s
 modem integration and a network API compatibility layer, implemented in the `net.c` file, 
 which provides the required socket API functions.
 
+The security layer is implemented using the [mbed TLS](https://github.com/Mbed-TLS/mbedtls) library.
+
 This example implements the mandatory LwM2M objects:
 
 * [Security Object (/0)](https://raw.githubusercontent.com/OpenMobileAlliance/lwm2m-registry/prod/0.xml)  
@@ -97,6 +99,10 @@ Application-specific configuration options:
   Override with: `-DCONFIG_ENDPOINT_NAME="your_endpoint_name"`
 * APN name (default: `internet`)
   Override with: `-DCONFIG_APN="your_apn_name"`
+* PSK identity (default: `anjay-lite-bare-metal-client`)
+  Override with: `-DCONFIG_PSK_IDENTITY="your_psk_identity"`
+* PSK key (default: `psk`)
+  Override with: `-DCONFIG_PSK_KEY="your_psk_key"`
 
 ---
 
@@ -168,7 +174,7 @@ To connect with the Coiote IoT Device Management Platform:
 
 1. Register at [https://eu.iot.avsystem.cloud](https://eu.iot.avsystem.cloud).
 2. Create a new device.
-3. For now, choose Security mode: NoSec (this example does not use secure CoAP).
+3. Choose PSK security mode
 4. Use the endpoint name configured in CMake.
 
 Detailed instructions are available here: 

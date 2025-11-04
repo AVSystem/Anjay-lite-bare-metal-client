@@ -1,0 +1,11 @@
+Anjay-bare-metal-client
+Copyright 2020-2025 AVSystem
+
+This product bundles Anjay Lite
+(https://github.com/AVSystem/Anjay-lite), licensed under the terms of the
+AVSystem Anjay-Lite LwM2M Client SDK - Non-Commercial License. See Anjay-Lite/LICENSE file
+for details.
+
+This product bundles Mbed TLS
+(https://github.com/Mbed-TLS/mbedtls), also licensed under the terms of the
+Apache License, version 2.0. See mbedtls/LICENSE file for details.

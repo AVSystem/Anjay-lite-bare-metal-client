@@ -1,22 +1,30 @@
 /*
  * Copyright 2025 AVSystem <avsystem@avsystem.com>
- * AVSystem Anjay LwM2M SDK
- * ALL RIGHTS RESERVED
+ * AVSystem Anjay Lite LwM2M SDK
+ * All rights reserved.
+ *
+ * Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
+ * See the attached LICENSE file for details.
  */
+
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <anj/core.h>
 #include <anj/dm/device_object.h>
 #include <anj/dm/security_object.h>
 #include <anj/dm/server_object.h>
-#include <anj/log/log.h>
+#include <anj/log.h>
+
+#include <mbedtls/memory_buffer_alloc.h>
 
 #include <adc.h>
 #include <gpdma.h>
 #include <gpio.h>
 #include <platform.h>
+#include <rng.h>
 #include <stm32u3xx_hal.h>
 #include <stm32u3xx_nucleo.h>
 #include <usart.h>
@@ -27,16 +35,22 @@
 
 #define app_log(...) anj_log(app, __VA_ARGS__)
 
-#ifndef CONFIG_ENDPOINT_NAME
-#    define CONFIG_ENDPOINT_NAME "anjay-lite-bare-metal-client"
-#endif // CONFIG_ENDPOINT_NAME
-
 static int install_security_obj(anj_t *anj,
                                 anj_dm_security_obj_t *security_obj) {
     anj_dm_security_instance_init_t security_inst = {
         .ssid = 1,
-        .server_uri = "coap://eu.iot.avsystem.cloud:5683",
-        .security_mode = ANJ_DM_SECURITY_NOSEC
+        .server_uri = "coaps://eu.iot.avsystem.cloud:5684",
+        .security_mode = ANJ_DM_SECURITY_PSK,
+        .public_key_or_identity = {
+            .source = ANJ_CRYPTO_DATA_SOURCE_BUFFER,
+            .info.buffer.data = CONFIG_PSK_IDENTITY,
+            .info.buffer.data_size = strlen(CONFIG_PSK_IDENTITY)
+        },
+        .secret_key = {
+            .source = ANJ_CRYPTO_DATA_SOURCE_BUFFER,
+            .info.buffer.data = CONFIG_PSK_KEY,
+            .info.buffer.data_size = strlen(CONFIG_PSK_KEY)
+        }
     };
     anj_dm_security_obj_init(security_obj);
     if (anj_dm_security_obj_add_instance(security_obj, &security_inst)
@@ -68,6 +82,9 @@ static int install_device_obj(anj_t *anj, anj_dm_device_obj_t *device_obj) {
     return anj_dm_device_obj_install(anj, device_obj, &device_obj_conf);
 }
 
+// Default size mentioned in MbedTLS docs is 100KB
+static uint8_t mbedtls_static_memory[100 * 1024];
+
 int main(void) {
     HAL_Init();
     SystemClock_Config();
@@ -75,6 +92,7 @@ int main(void) {
     MX_GPDMA1_Init();
     MX_ADC1_Init();
     MX_LPUART1_UART_Init();
+    MX_RNG_Init();
 
     /* Init BSP */
     BSP_LED_Init(LED_GREEN);
@@ -109,6 +127,9 @@ int main(void) {
         NVIC_SystemReset();
     }
     app_log(L_DEBUG, "Modem bringup successful!");
+
+    mbedtls_memory_buffer_alloc_init(mbedtls_static_memory,
+                                     sizeof(mbedtls_static_memory));
 
     anj_t anj;
     anj_dm_security_obj_t security_obj;

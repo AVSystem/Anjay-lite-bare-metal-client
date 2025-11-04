@@ -1,7 +1,10 @@
 /*
  * Copyright 2025 AVSystem <avsystem@avsystem.com>
- * AVSystem Anjay LwM2M SDK
- * ALL RIGHTS RESERVED
+ * AVSystem Anjay Lite LwM2M SDK
+ * All rights reserved.
+ *
+ * Licensed under AVSystem Anjay Lite LwM2M Client SDK - Non-Commercial License.
+ * See the attached LICENSE file for details.
  */
 
 #ifndef ANJ_CONFIG_H
@@ -41,7 +44,7 @@
 
 /**
  * Configures the size of the buffer for preparing outgoing messages payload.
- * Must be lower than @ref ANJ_OUT_MSG_BUFFER_SIZE to fit CoAP header in it as 
+ * Must be lower than @ref ANJ_OUT_MSG_BUFFER_SIZE to fit CoAP header in it as
  * well.
  *
  * Default value: 1024
@@ -63,7 +66,7 @@
 
 /**
  * Enable Composite Operations support (Read-Composite, Write-Composite)
- * 
+ *
  * If not active, Anjay will respond with message code 5.01 Not Implemented to
  * any composite type request.
  * To enable Observe-Composite as well, see @ref ANJ_WITH_COMPOSITE_OPERATIONS .
@@ -71,7 +74,8 @@
 /* #undef ANJ_WITH_COMPOSITE_OPERATIONS */
 
 /**
- * Configures the maximum number of entries (paths) in a composite operation.
+ * Configures the maximum number of entries (paths) in a composite read
+ * operation.
  *
  * Default value: 5
  * This option is meaningful if @ref ANJ_WITH_COMPOSITE_OPERATIONS is enabled.
@@ -108,7 +112,7 @@
  * Default value: 255
  * It affects statically allocated RAM.
  */
-#define ANJ_SEC_OBJ_MAX_PUBLIC_KEY_OR_IDENTITY_SIZE 0
+#define ANJ_SEC_OBJ_MAX_PUBLIC_KEY_OR_IDENTITY_SIZE 64
 
 /**
  * Configures the size of the buffer that holds Server Public Key
@@ -117,7 +121,7 @@
  * Default value: 255
  * It affects statically allocated RAM.
  */
-#define ANJ_SEC_OBJ_MAX_SERVER_PUBLIC_KEY_SIZE 0
+#define ANJ_SEC_OBJ_MAX_SERVER_PUBLIC_KEY_SIZE 64
 
 /**
  * Configures the size of the buffer that holds Secret Key
@@ -126,7 +130,7 @@
  * Default value: 255
  * It affects statically allocated RAM.
  */
-#define ANJ_SEC_OBJ_MAX_SECRET_KEY_SIZE 0
+#define ANJ_SEC_OBJ_MAX_SECRET_KEY_SIZE 64
 
 /******************************************************************************\
  * Server Object configuration
@@ -148,18 +152,18 @@
 /* #undef ANJ_WITH_DEFAULT_FOTA_OBJ */
 
 /**
- * Enable PULL method of Firmware dlivery in FOTA.
+ * Enable PULL method of Firmware delivery in FOTA.
  * Allows LwM2M Server to write an URI from which FW package can be downloaded
  * to /5/0/1 Resource.
  *
  * This method actually requires the application to implement a downloader and
  * get the FW package with handlers provided in
- * @ref anj_dm_fw_update_handlers_t
+ * @ref anj_dm_fw_update_handlers_t.
  */
 /* #undef ANJ_FOTA_WITH_PULL_METHOD */
 
 /**
- * Enable PUSH method of Firmware dlivery in FOTA.
+ * Enable PUSH method of Firmware delivery in FOTA.
  * Allows LwM2M Server to write FW package with a series of LwM2M Write
  * operations to /5/0/0 Resource.
  */
@@ -196,6 +200,34 @@
 /* #undef ANJ_FOTA_WITH_COAPS_TCP */
 
 /******************************************************************************\
+ * CoAP Downloader configuration
+\******************************************************************************/
+/**
+ * Enable CoAP Downloader Interface.
+ *
+ * This interface allows to download resources using CoAP protocol.
+ * It is used along with FOTA Object, but can also be used independently.
+ */
+/* #undef ANJ_WITH_COAP_DOWNLOADER */
+
+/**
+ * Configures the maximum number of paths that can be used in CoAP Download request.
+ *
+ * Default value: 3
+ * It affects statically allocated RAM.
+ */
+/* #define ANJ_COAP_DOWNLOADER_MAX_PATHS_NUMBER 3 */
+
+/**
+ * Configures the maximum size of a single request/response message in CoAP Downloader.
+ * This is the size of the whole message, including CoAP header and payload.
+ *
+ * Default value: 1200
+ * It affects statically allocated RAM.
+ */
+/* #undef ANJ_COAP_DOWNLOADER_MAX_MSG_SIZE 1200 */
+
+/******************************************************************************\
  * Observe configuration
 \******************************************************************************/
 /**
@@ -205,11 +237,11 @@
 #define ANJ_WITH_OBSERVE
 
 /**
- * Enable Observe-Composite and Cancel Observation-composite operations in 
+ * Enable Observe-Composite and Cancel Observation-composite operations in
  * Information Reporting Interface.
  *
- * Requires <c>ANJ_WITH_OBSERVE</c> to be enabled.
- * Requires <c>ANJ_WITH_COMPOSITE_OPERATIONS</c> to enabled.
+ * Requires @ref ANJ_WITH_OBSERVE to be enabled.
+ * Requires @ref ANJ_WITH_COMPOSITE_OPERATIONS to be enabled.
  */
 /* #undef ANJ_WITH_OBSERVE_COMPOSITE */
 
@@ -261,7 +293,7 @@
 /**
  * Enable reporting Observation-Class Attributes in response to Discover
  * operation.
- * 
+ *
  * Requires @ref ANJ_WITH_DISCOVER and @ref ANJ_WITH_OBSERVE to be enabled.
  */
 #define ANJ_WITH_DISCOVER_ATTR
@@ -294,11 +326,29 @@
 /* #undef ANJ_WITH_TIME_POSIX_COMPAT */
 
 /**
+ * Enable implementation of Anjay Lite Random Number Generator (RNG) API for
+ * POSIX-compilant platforms.
+ *
+ * If disabled, user must provide the compatibility layer.
+ */
+/* #define ANJ_WITH_RNG_POSIX_COMPAT */
+
+/**
  * Enable implementation of Anjay Lite socket API for POSIX-compilant plafroms.
  *
  * If disabled, user must provide the compatibility layer.
  */
 /* #undef ANJ_WITH_SOCKET_POSIX_COMPAT */
+
+/**
+ * Enable default implementation of crypto storage API. Default implementation
+ * is integrated with MbedTLS crypto library.
+ *
+ * If disabled, user must provide the compatibility layer.
+ *
+ * This option is meaningful only if @ref ANJ_WITH_EXTERNAL_CRYPTO_STORAGE is enabled.
+ */
+/* #undef ANJ_WITH_CRYPTO_STORAGE_DEFAULT */
 
 /**
  * Enable communication using IPv4 protocol.
@@ -314,7 +364,7 @@
 /**
  * Enable communication using IPv6 protocol.
  *
- * Must be enabled, if 
+ * Must be enabled, if
  * @link anj_net_socket_configuration_t.af_setting anj_t.net_socket_cfg.raw_socket_config.af_setting @endlink
  * forces IPv6 usage.
  * This option is meaningful if underlaying, platform sockets implementation
@@ -337,6 +387,100 @@
  * supports TCP.
  */
 /* #undef ANJ_NET_WITH_TCP */
+
+/**
+ * Enable communication using DTLS protocol.
+ *
+ * This option is meaningful if underlaying, platform sockets implementation
+ * supports DTLS.
+ */
+#define ANJ_NET_WITH_DTLS
+
+/**
+ * Enable support for MbedTLS library.
+ *
+ * This option enables default implementation of Anjay Lite DTLS sockets
+ * using MbedTLS library.
+ */
+#define ANJ_WITH_MBEDTLS
+
+/**
+ * Configures the maximum length of PSK Identity (used in PSK-based DTLS).
+ *
+ * Default value: 64
+ *
+ * This option is meaningful only if @ref ANJ_WITH_MBEDTLS is enabled.
+*/
+#define ANJ_MBEDTLS_PSK_IDENTITY_MAX_LEN 128
+
+/**
+ * (D)TLS version supported by client, supported values are
+ * MBEDTLS_SSL_VERSION_TLS1_2 and MBEDTLS_SSL_VERSION_TLS1_3.
+ *
+ * This option is meaningful only if @ref ANJ_WITH_MBEDTLS is enabled.
+ */
+#define ANJ_MBEDTLS_TLS_VERSION MBEDTLS_SSL_VERSION_TLS1_2
+
+/**
+ * Defines the allowed ciphersuites for default MbedTLS DTLS sockets implementation.
+ *
+ * You may specify multiple ciphersuites as a comma-separated list.
+ * Example: <c>MBEDTLS_TLS_PSK_WITH_AES_128_CBC_SHA256,MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8</c>
+ *
+ * This option is meaningful only if @ref ANJ_WITH_MBEDTLS is enabled.
+ *
+ * @note Defaults to <c>MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8,MBEDTLS_TLS_PSK_WITH_AES_256_CCM_8</c>
+ *       if not defined.
+ */
+#define ANJ_MBEDTLS_ALLOWED_CIPHERSUITES MBEDTLS_TLS_PSK_WITH_AES_128_CCM_8,MBEDTLS_TLS_PSK_WITH_AES_256_CCM_8
+
+/**
+ * Defines the initial handshake timeout value in milliseconds.
+ *
+ * Default value: 1000
+ *
+ * This option is meaningful only if @ref ANJ_WITH_MBEDTLS is enabled.
+ */
+#define ANJ_MBEDTLS_HS_INITIAL_TIMEOUT_VALUE_MS 1000
+
+/**
+ * Defines the maximum handshake timeout value in milliseconds.
+ *
+ * Default value: 60000
+ *
+ * This option is meaningful only if @ref ANJ_WITH_MBEDTLS is enabled.
+ */
+#define ANJ_MBEDTLS_HS_MAXIMUM_TIMEOUT_VALUE_MS 60000
+
+/******************************************************************************\
+ * Security configuration
+\******************************************************************************/
+/**
+ * Enable support for security communication in Anjay Lite.
+ */
+#define ANJ_WITH_SECURITY
+
+/**
+ * Enable support for certificates in Anjay Lite.
+ *
+ * If enabled, Anjay Lite will support certificate-based security mode
+ * (/0/x/2 Resource in Security Object).
+ *
+ * @note This option will disable PSK-based security mode. NoSec mode
+ *       will still be available.
+ */
+/* #undef ANJ_WITH_CERTIFICATES */
+
+/**
+ * Enable support for external crypto storage API.
+ *
+ * If enabled, Anjay Lite is allowed to use external crypto storage API
+ * to store security information (e.g. certificates, keys).
+ *
+ * During bootstrap or persistence process, Anjay Lite will use external
+ * crypto storage API to store all provided security information.
+ */
+/* #undef ANJ_WITH_EXTERNAL_CRYPTO_STORAGE */
 
 /******************************************************************************\
  * Data Formats configuration
@@ -413,7 +557,7 @@
  * Enable TLV Content Format (application/vnd.oma.lwm2m+tlv, numerical-value
  * 11542) decoder.
  *
- * NOTE: encoder is not implemented.
+ * @note Encoder is not implemented.
  */
 #define ANJ_WITH_TLV
 
@@ -438,7 +582,7 @@
  * Configures the maximum allowed number of Options present in CoAP header, in a
  * single frame.
  *
- * Default value: 10
+ * Default value: 15
  * If an incomming message has more options, Anjay Lite will not process it or
  * respond to it.
  */
@@ -476,6 +620,24 @@
  */
 #define ANJ_COAP_MAX_LOCATION_PATH_SIZE 40
 
+/**
+ * Enables respones caching mechanism.
+ * When eneabled, Anjay Lite caches responses to ensure that duplicate messages
+ * (e.g. due to retransmissions or retries) are processed exactly once. This
+ * guarantees idempotent behavior for operations with side effects.
+ *
+ * It affects statically allocated RAM.
+ */
+/* #undef ANJ_WITH_CACHE */
+
+/**
+ * Configures the number of cached responses.
+ *
+ * Default value: 10
+ * It affects statically allocated RAM.
+ */
+/* #undef ANJ_CACHE_ENTRIES_NUMBER 10 */
+
 /******************************************************************************\
  * Logger configuration
 \******************************************************************************/
@@ -491,14 +653,14 @@
 /**
  * Enable logger in alternative mode. This should be defined to path to header
  * file that specifes an alternative implementation of
- * @ref ANJ_LOG_HANDLER_IMPL_MACRO with arguments:
+ * @c ANJ_LOG_HANDLER_IMPL_MACRO with arguments:
  * - Module: module name, in the same form as in @ref anj_log() calls
  *   (stringifiable identifier).
- * - Level: identifier, one of: L_TRACE, L_DEBUG, L_INFO, L_WARNING, L_ERROR,
- *   L_MUTE. L_MUTE must not generate a message.
+ * - Level: identifier, one of: @c L_TRACE, @c L_DEBUG, @c L_INFO, @c L_WARNING,
+ *   @c L_ERROR, @c L_MUTE. @c L_MUTE must not generate a message.
  * - format string as in <c>printf()</c> function and arguments
  *
- * This header file is included by by <c>anj/log/log.h</c>. This is useful to
+ * This header file is included by by @ref anj/log.h. This is useful to
  * completely replace log calls with a custom definition, e.g. to emit log calls
  * compatible with other logging libraries, such as the built-in system in
  * Zephyr.
@@ -509,8 +671,8 @@
  * Use <c>vsnprintf()</c> to format log messages. This is the preferred option
  * if the application already uses other functions from <c>printf()</c> family.
  *
- * NOTE: this option affects only the builds that use built-in log handler,
- * i.e. @ref ANJ_LOG_FULL .
+ * @note This option affects only the builds that use built-in log handler,
+ *       i.e. @ref ANJ_LOG_FULL.
  */
 #define ANJ_LOG_FORMATTER_PRINTF
 
@@ -520,23 +682,23 @@
  *
  * Caution: the buffer is allocated on stack when calling @ref anj_log() macro.
  *
- * NOTE: this option affects only the builds that use built-in log handler,
- * i.e. @ref ANJ_LOG_FULL .
+ * @note This option affects only the builds that use built-in log handler,
+ *       i.e. @ref ANJ_LOG_FULL.
  */
 #define ANJ_LOG_FORMATTER_BUF_SIZE 512
 
 /**
  * Output log messages on stderr.
  *
- * NOTE: this option affects only the builds that use built-in log handler,
- * i.e. @ref ANJ_LOG_FULL .
+ * @note This option affects only the builds that use built-in log handler,
+ *       i.e. @ref ANJ_LOG_FULL.
  */
 /* #undef ANJ_LOG_HANDLER_OUTPUT_STDERR */
 
 /**
  * Use alternative implementation of output function for log handler. End user
  * must implement the @ref anj_log_handler_output() function, declared in
- * <c>anj/compat/log_impl_decls.h</c>.
+ * @ref anj/compat/log_impl_decls.h.
  */
 #define ANJ_LOG_HANDLER_OUTPUT_ALT
 
@@ -546,23 +708,13 @@
 /* #undef ANJ_LOG_STRIP_CONSTANTS */
 
 /**
- * If enabled, the logger will verify the format string upon call whether it
- * only uses the format specifiers allowed, as defined in description for
- * @ref anj_log() macro. In case an unexpected format specifier is used,
- * assertion is raised.
- */
-#ifdef DEBUG
-#define ANJ_LOG_DEBUG_FORMAT_CONSTRAINTS_CHECK
-#endif // DEBUG
-
-/**
  * Default log level. Any log statements with a level lower than this will be
  * excluded from the build.
  *
- * NOTE: Defaults to <c>L_INFO</c> if not defined.
+ * @note Defaults to @c L_INFO if not defined.
  *
- * NOTE: Log level may be overridden for specific modules, see
- * @ref ANJ_LOG_FILTERING_CONFIG_HEADER .
+ * @note Log level may be overridden for specific modules, see @ref
+ *       ANJ_LOG_FILTERING_CONFIG_HEADER.
  */
 #define ANJ_LOG_LEVEL_DEFAULT L_TRACE
 
@@ -586,6 +738,17 @@
 /* #undef ANJ_LOG_FILTERING_CONFIG_HEADER */
 
 /******************************************************************************\
+ * Persistence configuration
+\******************************************************************************/
+/**
+ * Enable Persistence support.
+ *
+ * When enabled, Anjay Lite can store and restore its state e.g. state of
+ * Security and Server objects.
+ */
+/* #undef ANJ_WITH_PERSISTENCE */
+
+/******************************************************************************\
  * Other configuration
 \******************************************************************************/
 /**
@@ -595,7 +758,8 @@
 
 /**
  * Enables custom convertion functions implementation that do not require
- * sprintf() and sscanf() in Anjay Lite for string<->number convertions.
+ * <c>sprintf()</c> and <c>sscanf()</c> in Anjay Lite for string<->number
+ * convertions.
  *
  * Useful on constrained platforms which do not use these functions.
  */
